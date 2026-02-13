@@ -1,0 +1,607 @@
+{
+  "name": "My Stylist 2",
+  "nodes": [
+    {
+      "parameters": {
+        "pollTimes": {
+          "item": [
+            {
+              "mode": "everyMinute"
+            }
+          ]
+        },
+        "triggerOn": "specificFolder",
+        "folderToWatch": {
+          "__rl": true,
+          "value": "19eAtiDDXpMXe0n-dxMsIQjrn1wIkwzyO",
+          "mode": "list",
+          "cachedResultName": "My Wardrobe",
+          "cachedResultUrl": "https://drive.google.com/drive/folders/19eAtiDDXpMXe0n-dxMsIQjrn1wIkwzyO"
+        },
+        "event": "fileCreated",
+        "options": {
+          "fileType": "all"
+        }
+      },
+      "type": "n8n-nodes-base.googleDriveTrigger",
+      "typeVersion": 1,
+      "position": [
+        -960,
+        -208
+      ],
+      "id": "66324dd0-3ac1-495b-a181-d68b45a0d1b0",
+      "name": "Google Drive Trigger",
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "QDRiiNMnbPClZNhj",
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "a0250530-f2ef-4d02-b0e6-d4ae70a78dcc",
+              "leftValue": "={{ $json.mimeType }}",
+              "rightValue": "image",
+              "operator": {
+                "type": "string",
+                "operation": "contains"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        -752,
+        -208
+      ],
+      "id": "5dd547d9-945a-41fd-abf5-26cc4b3835cc",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "operation": "download",
+        "fileId": {
+          "__rl": true,
+          "value": "={{ $json.id }}",
+          "mode": "id"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        -592,
+        -208
+      ],
+      "id": "8bb8a24d-c90e-4422-9198-dfa638fcb9f4",
+      "name": "Download file",
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "QDRiiNMnbPClZNhj",
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "image",
+        "operation": "analyze",
+        "modelId": {
+          "__rl": true,
+          "value": "models/gemini-2.5-flash",
+          "mode": "list",
+          "cachedResultName": "models/gemini-2.5-flash"
+        },
+        "text": "What's in this image?Analyze this clothing item.\nReturn JSON in a form:\n{\n\"type\": \"\",\n\"color\": \"\",\n\"formality\": \"\",\n\"season\": \"\",\n\"occasion_type\": \"\"\n}",
+        "inputType": "binary",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.googleGemini",
+      "typeVersion": 1.1,
+      "position": [
+        -400,
+        -208
+      ],
+      "id": "bf655d43-4e32-45ba-b605-c1b9f4fe17bc",
+      "name": "Analyze an image",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "RgYip3jVgCD9OUy6",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const text = $json.content.parts[0].text;\n\n// remove ```json ``` wrappers\nconst clean = text\n  .replace(/```json/g, \"\")\n  .replace(/```/g, \"\")\n  .trim();\n\nconst data = JSON.parse(clean);\n\nreturn [\n  {\n    json: data\n  }\n];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -176,
+        -208
+      ],
+      "id": "bef3ab86-8850-4dc4-a288-2a6eacdc951c",
+      "name": "Code in JavaScript"
+    },
+    {
+      "parameters": {
+        "tableId": "wardrobe",
+        "fieldsUi": {
+          "fieldValues": [
+            {
+              "fieldId": "type",
+              "fieldValue": "={{ $json.type }}"
+            },
+            {
+              "fieldId": "color",
+              "fieldValue": "={{ $json.color }}"
+            },
+            {
+              "fieldId": "formality",
+              "fieldValue": "={{ $json.formality }}"
+            },
+            {
+              "fieldId": "season",
+              "fieldValue": "={{ $json.season }}"
+            },
+            {
+              "fieldId": "occasion_type",
+              "fieldValue": "={{ $json.occasion_type }}"
+            },
+            {
+              "fieldId": "drive_file_id",
+              "fieldValue": "={{ $('Google Drive Trigger').item.json.id }}"
+            },
+            {
+              "fieldId": "drive_file_link",
+              "fieldValue": "={{ $('Google Drive Trigger').item.json.webViewLink }}"
+            },
+            {
+              "fieldId": "email",
+              "fieldValue": "={{ $('Google Drive Trigger').item.json.permissions[0].emailAddress }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        16,
+        -208
+      ],
+      "id": "c6a55921-337f-44df-bfa0-5b3d23a71a2f",
+      "name": "Create a row",
+      "credentials": {
+        "supabaseApi": {
+          "id": "pXGUrJc90TjJGWvv",
+          "name": "Supabase account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "public": true,
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chatTrigger",
+      "typeVersion": 1.4,
+      "position": [
+        -1024,
+        -32
+      ],
+      "id": "1758ad16-fd16-4476-a0a8-299efe61700f",
+      "name": "When chat message received",
+      "webhookId": "09e7b3e8-4460-4b63-b3d2-0b1f27ac1394"
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "value": "gpt-4o-mini",
+          "mode": "list",
+          "cachedResultName": "GPT-4O-MINI"
+        },
+        "responses": {
+          "values": [
+            {
+              "content": "=Extract only the following fields from the message based on user intent or exact words:\ntype\ncolor\nformality\nseason\noccasion_type\n\nIf the user clearly mentions clothing, extract exactly what is said.\nIf the user mentions an activity or place (for example: going to a cafe today, office, wedding, gym, party, etc.) but does NOT mention clothing, infer suitable clothing attributes for that situation and fill the fields accordingly.\n\nGuidelines for inference:\n- type → suggest a reasonable outfit item (e.g., t-shirt, shirt, jeans, dress, jacket, etc.)\n- color → leave \"\" unless the user explicitly mentions a color\n- formality → casual / smart casual / formal based on context\n- season → infer from context like \"today\", weather words, or leave \"\" if unclear\n- occasion_type → daily wear, cafe, office, party, wedding, gym, etc.\n\nIf a field cannot be determined even after context inference, return \"\".\nReturn only valid JSON in the exact format below. No explanations.\n\n{\n  \"type\": \"\",\n  \"color\": \"\",\n  \"formality\": \"\",\n  \"season\": \"\",\n  \"occasion_type\": \"\"\n}\n\nUser Message: {{ $json.chatInput }}\n"
+            }
+          ]
+        },
+        "builtInTools": {},
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 2.1,
+      "position": [
+        -880,
+        -32
+      ],
+      "id": "3e7b8e2a-0df4-4221-a006-991fda06b801",
+      "name": "Message a model",
+      "credentials": {
+        "openAiApi": {
+          "id": "nTUW9AbplzXyBqXt",
+          "name": "n8n free OpenAI API credits"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Get the first item\nconst input = $json[\"output\"][0][\"content\"][0][\"text\"];\n\n// Parse the text to proper JSON\nlet data = JSON.parse(input);\n\n// Remove keys with empty string values\nfor (const key in data) {\n  if (data[key] === \"\") {\n    delete data[key];\n  }\n}\n\n// Return cleaned object\nreturn [data];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -608,
+        -32
+      ],
+      "id": "7aa5d6bb-68e5-49e7-92ec-d30c785cfe39",
+      "name": "Code in JavaScript1"
+    },
+    {
+      "parameters": {
+        "operation": "getAll",
+        "tableId": "wardrobe",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "email",
+              "condition": "eq",
+              "keyValue": "\"\""
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        -464,
+        -32
+      ],
+      "id": "a8e533a0-04a2-4ddc-b3d1-d1883d005bc4",
+      "name": "Get many rows",
+      "credentials": {
+        "supabaseApi": {
+          "id": "pXGUrJc90TjJGWvv",
+          "name": "Supabase account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// 1️⃣ Get AI keywords\nlet keywordsRaw = $items(\"Code in JavaScript1\")[0].json || [];\nlet keywords = Array.isArray(keywordsRaw) ? keywordsRaw[0] : keywordsRaw || {};\n\n// 2️⃣ Get dresses from Supabase (all items)\nconst allItems = $items(\"Get many rows\");\nlet dresses = allItems.map(item => item.json);\n\n// 3️⃣ Filter dresses intelligently\nconst filtered = dresses.filter(dress => {\n    return Object.keys(keywords).every(key => {\n        if (!dress.hasOwnProperty(key)) {\n            return true;\n        }\n        \n        const keywordValue = keywords[key];\n        if (!keywordValue || keywordValue.trim() === \"\") {\n            return true;\n        }\n        \n        const dressValue = dress[key];\n        if (!dressValue) {\n            return false;\n        }\n        \n        const keywordList = keywordValue.split(\",\").map(k => k.trim().toLowerCase());\n        return keywordList.some(k => dressValue.toLowerCase().includes(k));\n    });\n});\n\n// 4️⃣ Fallback: if filtered is empty, return all dresses\nconst finalResult = filtered.length > 0 ? filtered : dresses;\n\n// 5️⃣ Return result\nreturn [{ json: { filtered_dresses: finalResult } }];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -320,
+        -32
+      ],
+      "id": "bf3cf31c-3fc2-46b6-a542-6db7dd672db7",
+      "name": "Code in JavaScript2"
+    },
+    {
+      "parameters": {
+        "jsCode": "// your Supabase result\nconst raw = $json;\n\n// find all items that actually have clothing fields\nconst items = [];\n\nfor (const key in raw) {\n  const val = raw[key];\n  if (Array.isArray(val)) {\n    for (const i of val) {\n      if (i.type) items.push(i);\n    }\n  }\n}\n\n// fallback if already array\nif (Array.isArray(raw)) {\n  for (const i of raw) {\n    if (i.type) items.push(i);\n  }\n}\n\nreturn [{ json: { wardrobe: items } }];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -192,
+        -32
+      ],
+      "id": "471b8c71-77bc-4099-9930-e833ad6ba0d8",
+      "name": "Code in JavaScript3"
+    },
+    {
+      "parameters": {
+        "jsCode": "try {\n  // Get the response from previous node\n  const response = $input.item.json;\n  \n  // Navigate through the nested structure\n  const textContent = response.output[0].content[0].text;\n  \n  // Parse the JSON string\n  const outfitData = JSON.parse(textContent);\n  \n  // Extract all drive_file_link values\n  const driveLinks = outfitData.outfit_items.map(item => item.drive_file_link);\n  \n  // Extract file IDs too (useful for downloads)\n  const fileIds = outfitData.outfit_items.map(item => item.drive_file_id);\n  \n  console.log('Extracted links:', driveLinks);\n  \n  // Return the links and other useful data\n  return {\n    json: {\n      drive_links: driveLinks\n    }\n  };\n} catch (error) {\n  console.error('Error parsing response:', error);\n  return {\n    json: {\n      error: error.message,\n      drive_links: []\n    }\n  };\n}"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        288,
+        -32
+      ],
+      "id": "ebe15467-f55c-4c36-a83e-79236d777c69",
+      "name": "Code in JavaScript4"
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "value": "gpt-4.1-mini",
+          "mode": "list",
+          "cachedResultName": "GPT-4.1-MINI"
+        },
+        "responses": {
+          "values": [
+            {
+              "content": "=You are a professional fashion stylist with ONE CRITICAL RULE: You can ONLY use items that exist in the wardrobe provided. You CANNOT create, imagine, or suggest ANY new items.\n\nWARDROBE:\n{{ JSON.stringify($json.wardrobe) }}\n\nGOAL:\nCreate the best CASUAL outfit using ONLY items already in the wardrobe above.\n\nMANDATORY PROCESS:\n1. First, identify ALL items in the wardrobe where formality contains \"Casual\" or \"casual\" (case-insensitive)\n2. From those casual items, select compatible pieces\n3. Copy those items EXACTLY - character by character - with zero modifications\n\nSTYLING RULES:\n- Combine compatible items (top + bottom, jacket, or accessories) when possible\n- Include items where formality field contains \"casual\" (ignore case)\n- Prefer items with matching or complementary colors\n- Prefer matching occasion_type and season when available\n- If only one suitable item exists, return it alone\n- If multiple suitable items exist, choose a combination that works together\n\nABSOLUTE PROHIBITIONS - NEVER DO THESE:\n❌ Do NOT create new items\n❌ Do NOT suggest items not in the wardrobe\n❌ Do NOT modify ANY field - copy EXACTLY as written\n❌ Do NOT change color, drive_file_link, drive_file_id, or any other field\n❌ Do NOT add clothing items that don't exist in the input\n❌ Do NOT invent shoes, accessories, or any clothing\n\nCRITICAL: If the wardrobe contains items but you're unsure about formality matching, include items anyway and explain in stylist_notes. DO NOT return empty outfit_items if wardrobe has items.\n\nOUTPUT FORMAT:\nReturn ONLY valid JSON with NO markdown, NO code blocks, NO explanations.\n\n{\n  \"outfit_items\": [\n    // EXACT copies of item objects from the wardrobe input - nothing modified\n  ],\n  \"stylist_notes\": \"Brief explanation\"\n}\n\nEXAMPLE INPUT:\n[\n  {\n    \"id\": \"759727fc-8f66-4187-8d19-3c4d40dd7242\",\n    \"drive_file_id\": \"1Fzv1nRaMTRUtDwQKALZDtS9IZt8Blgfq\",\n    \"drive_file_link\": \"https://drive.google.com/file/d/1Fzv1nRaMTRUtDwQKALZDtS9IZt8Blgfq/view?usp=drivesdk\",\n    \"type\": \"Jeans\",\n    \"color\": \"Blue\",\n    \"formality\": \"Casual\",\n    \"season\": \"All Seasons\",\n    \"occasion_type\": \"Everyday Casual\",\n    \"created_at\": \"2026-02-12T05:27:32.812009+00:00\",\n    \"email\": \"\"\n  }\n]\n\nEXAMPLE OUTPUT (copy items exactly as they appear):\n{\n  \"outfit_items\": [\n    {\n      \"id\": \"759727fc-8f66-4187-8d19-3c4d40dd7242\",\n      \"drive_file_id\": \"1Fzv1nRaMTRUtDwQKALZDtS9IZt8Blgfq\",\n      \"drive_file_link\": \"https://drive.google.com/file/d/1Fzv1nRaMTRUtDwQKALZDtS9IZt8Blgfq/view?usp=drivesdk\",\n      \"type\": \"Jeans\",\n      \"color\": \"Blue\",\n      \"formality\": \"Casual\",\n      \"season\": \"All Seasons\",\n      \"occasion_type\": \"Everyday Casual\",\n      \"created_at\": \"2026-02-12T05:27:32.812009+00:00\",\n      \"email\": \"\"\n    }\n  ],\n  \"stylist_notes\": \"Casual blue jeans perfect for everyday wear\"\n}\n\nRemember: Your job is to SELECT and COPY items from the wardrobe, NOT to create or modify them. Copy every field EXACTLY as it appears in the input."
+            }
+          ]
+        },
+        "builtInTools": {},
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 2.1,
+      "position": [
+        16,
+        -32
+      ],
+      "id": "af1f25f1-c49f-4599-960b-b3ff5c9ef3db",
+      "name": "Message a model1",
+      "credentials": {
+        "openAiApi": {
+          "id": "nTUW9AbplzXyBqXt",
+          "name": "n8n free OpenAI API credits"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "fieldToSplitOut": "drive_links",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitOut",
+      "typeVersion": 1,
+      "position": [
+        432,
+        -32
+      ],
+      "id": "0e733e78-be75-4de3-a363-efcdf41a4389",
+      "name": "Split Out"
+    },
+    {
+      "parameters": {
+        "operation": "download",
+        "fileId": {
+          "__rl": true,
+          "value": "={{ $json.drive_links }}",
+          "mode": "url"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        576,
+        -32
+      ],
+      "id": "0bdefed3-18c6-40b3-8c78-0c78918a38d0",
+      "name": "Download file1",
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "QDRiiNMnbPClZNhj",
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "image",
+        "operation": "edit",
+        "prompt": "You are a professional fashion illustrator.\n\nI have provided photos of clothing items. Create a realistic illustration showing these EXACT items styled together on a full-body mannequin.\n\nSTRICT REQUIREMENTS:\n❌ DO NOT add any new clothing items\n❌ DO NOT change colors of the items\n❌ DO NOT modify patterns or designs\n❌ DO NOT add accessories not shown in images\n\n✅ DO recreate each item exactly as photographed\n✅ DO maintain accurate colors and textures\n✅ DO arrange items together on a mannequin\n✅ DO use a simple neutral background\n\nOutput: One professional illustration showing the provided clothing items styled together on a mannequin.",
+        "images": {
+          "values": [
+            {},
+            {}
+          ]
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 2.1,
+      "position": [
+        720,
+        -32
+      ],
+      "id": "8746d50f-7200-4708-893c-1a688f5ac94c",
+      "name": "Edit image",
+      "credentials": {
+        "openAiApi": {
+          "id": "qidujUyuKUJx6oUU",
+          "name": "OpenAi account 2"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Google Drive Trigger": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "Download file",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Download file": {
+      "main": [
+        [
+          {
+            "node": "Analyze an image",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Analyze an image": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript": {
+      "main": [
+        [
+          {
+            "node": "Create a row",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "When chat message received": {
+      "main": [
+        [
+          {
+            "node": "Message a model",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Message a model": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript1": {
+      "main": [
+        [
+          {
+            "node": "Get many rows",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get many rows": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript2": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript3": {
+      "main": [
+        [
+          {
+            "node": "Message a model1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript4": {
+      "main": [
+        [
+          {
+            "node": "Split Out",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Message a model1": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript4",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split Out": {
+      "main": [
+        [
+          {
+            "node": "Download file1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Download file1": {
+      "main": [
+        [
+          {
+            "node": "Edit image",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "8141464c-ecbf-43ab-afe4-fcbdfb7c7e0f",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "aaa5a2527fd7752dc283f85edb7b8c42bbf6987a844520c2ade5a4753f52d209"
+  },
+  "id": "pjqy-cOWZp8fC-dIzHORg",
+  "tags": []
+}
