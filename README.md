@@ -171,4 +171,3 @@ This system simulates a real-world AI stylist that:
 @Rabia-Sadiq
 ---
 
-Just tell me which vibe you want.
