@@ -1,176 +1,174 @@
-👗 AI-Powered Virtual Fashion Stylist (n8n Automation)
 
-An end-to-end AI-powered wardrobe management and outfit generation system built using automation, computer vision, NLP, and image generation.
+---
 
-This system allows users to upload clothing items, automatically analyzes them using AI, stores structured metadata, understands natural language outfit requests, selects appropriate outfits strictly from the user’s wardrobe, and generates a styled mannequin illustration.
+# 👗 AI-Powered Virtual Fashion Stylist
 
-🚀 Features
-1️⃣ Smart Wardrobe Ingestion
+An end-to-end AI automation system that transforms a physical wardrobe into a structured, intelligent, and interactive digital styling assistant.
 
-Watches a specific Google Drive folder
+This project automatically analyzes clothing images, stores structured metadata, understands natural language outfit requests, selects appropriate outfits strictly from the user’s wardrobe, and generates a styled mannequin illustration.
 
-Automatically detects newly uploaded clothing images
+---
 
-Uses AI vision model to extract:
+## 🚀 Overview
 
-Type
+This system solves three problems:
 
-Color
+1. Digitizing a wardrobe automatically
+2. Understanding natural language outfit requests
+3. Generating realistic outfit visualizations
 
-Formality
+It combines automation, computer vision, NLP, database filtering, and image generation into one orchestrated workflow.
 
-Season
+---
 
-Occasion type
+## ✨ Features
 
-Stores structured data in Supabase
+### 🧥 1. Smart Wardrobe Ingestion
 
-2️⃣ Natural Language Outfit Requests
+* Watches a specific Google Drive folder
+* Automatically detects newly uploaded clothing images
+* Uses AI vision model to extract:
+
+  * Type
+  * Color
+  * Formality
+  * Season
+  * Occasion Type
+* Stores structured clothing data in Supabase
+
+---
+
+### 💬 2. Natural Language Outfit Requests
 
 Users can send messages like:
 
-“I’m going to a cafe today”
-
-“I need something casual”
-
-“Suggest an outfit for a wedding”
+* “I’m going to a cafe today”
+* “Suggest something casual”
+* “What should I wear to a wedding?”
 
 The system:
 
-Extracts structured attributes from user intent
+* Extracts structured attributes from user intent
+* Infers missing details intelligently
+* Returns clean JSON
+* Filters wardrobe accordingly
 
-Infers missing details intelligently
+---
 
-Returns clean JSON
+### 🧠 3. Intelligent Wardrobe Filtering
 
-3️⃣ Intelligent Wardrobe Filtering
+* Fetches wardrobe from Supabase
+* Matches items based on:
 
-Fetches wardrobe from Supabase
+  * Type
+  * Color
+  * Formality
+  * Season
+  * Occasion
+* Supports partial and flexible matching
+* Gracefully falls back if no exact match is found
 
-Filters based on:
+---
 
-Type
+### 👗 4. Strict AI Stylist Mode
 
-Color
+The stylist model operates under strict constraints:
 
-Formality
-
-Season
-
-Occasion
-
-Supports partial matching
-
-Falls back gracefully if no exact match is found
-
-4️⃣ Strict AI Stylist Mode
-
-The stylist model:
-
-Can ONLY select items already in the wardrobe
-
-Cannot invent new clothing
-
-Cannot modify colors or attributes
-
-Must copy items exactly from database
+* Can ONLY select items already present in the wardrobe
+* Cannot invent new clothing items
+* Cannot modify attributes
+* Must copy items exactly from database
 
 This prevents hallucination and ensures realistic styling.
 
-5️⃣ AI Outfit Illustration
+---
 
-Selected outfit items are downloaded
+### 🎨 5. AI Outfit Illustration
 
-Sent to image editing model
+* Selected clothing items are downloaded
+* Sent to image editing model
+* Generates a realistic full-body mannequin illustration
+* Maintains accurate colors and textures
+* No new accessories or items added
 
-Generates a realistic mannequin illustration
+---
 
-Maintains exact colors and clothing details
+## 🏗 System Architecture
 
-No extra accessories added
-
-🏗 Architecture Overview
-
-Upload Image
+Image Upload
 → Google Drive Trigger
-→ Vision AI Analysis
-→ JSON Cleanup
+→ AI Vision Analysis
+→ JSON Parsing
 → Store in Supabase
 
-User Chat
+User Message
 → Intent Extraction
-→ Filter Wardrobe
+→ Wardrobe Fetch
+→ Filtering Logic
 → Strict AI Stylist
-→ Extract Drive Links
+→ Extract Image Links
 → Generate Styled Illustration
 
-🛠 Tech Stack
+---
 
-n8n (Workflow Automation)
+## 🛠 Tech Stack
 
-Google Drive (Wardrobe Storage)
+* n8n (Workflow Automation Engine)
+* Google Drive (Wardrobe Storage)
+* Google Gemini (Image Analysis)
+* OpenAI (Intent Extraction + Styling + Image Editing)
+* Supabase (Database)
 
-Google Gemini (Image Analysis)
+---
 
-OpenAI (Intent Extraction + Styling + Image Editing)
+## 📂 Database Schema (Supabase: `wardrobe` Table)
 
-Supabase (Database)
+| Field           | Description                    |
+| --------------- | ------------------------------ |
+| type            | Clothing type                  |
+| color           | Clothing color                 |
+| formality       | Casual / Formal / Smart Casual |
+| season          | Suitable season                |
+| occasion_type   | Usage context                  |
+| drive_file_id   | Google Drive file ID           |
+| drive_file_link | Direct file link               |
+| email           | User identifier                |
+| created_at      | Timestamp                      |
 
-🧠 Key Design Principles
+---
 
-Multi-model orchestration
+## 🧩 Design Principles
 
-Strict anti-hallucination constraints
+* Multi-model AI orchestration
+* Anti-hallucination prompt constraints
+* JSON-only AI responses
+* Modular automation workflow
+* Scalable database filtering logic
 
-JSON-only AI outputs
+---
 
-Graceful fallback filtering logic
-
-Automation-first architecture
-
-Modular node-based design
-
-📂 Database Structure (Supabase Table: wardrobe)
-Field	Description
-type	Clothing type
-color	Clothing color
-formality	Casual / Formal / etc
-season	Season suitability
-occasion_type	Usage context
-drive_file_id	Google Drive file ID
-drive_file_link	Direct link
-email	User identifier
-created_at	Timestamp
-🎯 Use Case
+## 🎯 Use Case
 
 This system simulates a real-world AI stylist that:
 
-Digitizes a user’s physical wardrobe
+* Digitizes a physical wardrobe
+* Understands human language
+* Makes context-aware outfit decisions
+* Generates visual outfit presentations
 
-Understands human language
+---
 
-Makes context-aware outfit decisions
+## 📌 Current Status
 
-Visually presents styled outfits
+* Fully functional end-to-end workflow
+* Automated wardrobe ingestion
+* AI-based outfit selection
+* AI-generated mannequin visualization
 
-📌 Current Status
 
-Fully functional end-to-end workflow
+## 👩‍💻 Author
 
-Supports automated wardrobe ingestion
+@Rabia-Sadiq
+---
 
-Supports AI-based outfit generation
-
-Generates styled mannequin illustrations
-
-Future improvements may include:
-
-Multi-user authentication
-
-Weather-based recommendations
-
-Mood-based styling
-
-Outfit history memory
-
-Frontend UI integration
+Just tell me which vibe you want.
