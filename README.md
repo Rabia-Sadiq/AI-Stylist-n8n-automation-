@@ -1,7 +1,7 @@
 
 ---
 
-# 👗 AI-Powered Virtual Fashion Stylist
+# 👗  Intelligent AI Wardrobe & Outfit Recommendation System
 
 An end-to-end AI automation system that transforms a physical wardrobe into a structured, intelligent, and interactive digital styling assistant.
 
